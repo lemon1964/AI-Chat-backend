@@ -37,7 +37,7 @@ else:
     CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='', cast=Csv())
 
     # заменить на продакт
-    FRONT_URL = 'https://kid-front.onrender.com'
+    FRONT_URL = 'https://ai-chat-frontend-wy6h.onrender.com'
     DOMAIN = 'ai-chat-backend-3cba.onrender.com'
     
 INSTALLED_APPS = [
