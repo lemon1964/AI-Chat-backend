@@ -38,7 +38,7 @@ else:
 
     # заменить на продакт
     FRONT_URL = 'https://kid-front.onrender.com'
-    DOMAIN = 'kid-wlsf.onrender.com'
+    DOMAIN = 'ai-chat-backend-3cba.onrender.com'
     
 INSTALLED_APPS = [
     'django.contrib.sites',  # Обязательно для django-allauth
