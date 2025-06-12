@@ -33,7 +33,7 @@ venv/
 .coverage.*
 
 # добавляем лишние теперь папки
-# media/
+media/
 # scripts/
 
 
