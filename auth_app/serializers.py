@@ -49,12 +49,12 @@ class CustomRegisterSerializer(RegisterSerializer):
         confirmation_url = f"http://{settings.DOMAIN}{reverse('custom_verify_email')}?uid={uid}&token={token}"
         # Отправка письма через Django SMTP
         subject = "Email Confirmation"
-        message = f"Please confirm your email using the following link: {confirmation_url}"
+        message = f"Подтвердите свой адрес электронной почты, перейдя по следующей ссылке: {confirmation_url}"
         html_message = f"""
         <html>
             <body>
-                <p>Please confirm your email using the following link:</p>
-                <p><a href="{confirmation_url}">Click here to confirm your email</a></p>
+                <p>Подтвердите свой адрес электронной почты, перейдя по следующей ссылке:</p>
+                <p><a href="{confirmation_url}">Нажмите здесь для подтверждения адреса</a></p>
             </body>
         </html>
         """
