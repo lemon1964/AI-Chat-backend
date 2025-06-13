@@ -12,7 +12,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
-import time
 
 User = get_user_model()
 
@@ -47,20 +46,25 @@ class CustomRegisterSerializer(RegisterSerializer):
         # Генерация ссылки подтверждения
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-        # domain = "localhost:8000"  # Укажите свой порт
         confirmation_url = f"http://{settings.DOMAIN}{reverse('custom_verify_email')}?uid={uid}&token={token}"
-        # confirmation_url = f"http://{domain}{reverse('custom_verify_email')}?uid={uid}&token={token}"
-        # domain = get_current_site(request).domain
-        # confirmation_url = f"http://{domain}{reverse('custom_verify_email')}?uid={uid}&token={token}"
-
         # Отправка письма через Django SMTP
+        subject = "Email Confirmation"
+        message = f"Please confirm your email using the following link: {confirmation_url}"
+        html_message = f"""
+        <html>
+            <body>
+                <p>Please confirm your email using the following link:</p>
+                <p><a href="{confirmation_url}">Click here to confirm your email</a></p>
+            </body>
+        </html>
+        """
         send_mail(
-            subject="Email Confirmation",
-            message=f"Please confirm your email using the following link: {confirmation_url}",
-            from_email="your-email@example.com",
+            subject,
+            message,
+            from_email={settings.EMAIL_HOST_USER},  # Укажите свой адрес отправителя EMAIL_HOST_USER
             recipient_list=[user.email],
+            html_message=html_message  # Передаем HTML-сообщение для кликабельной ссылки
         )
-
         return user
 
 
@@ -83,7 +87,6 @@ class CustomPasswordResetSerializer(PasswordResetSerializer):
         uid = self.context.get('uid', '')  # Теперь uid должен быть в контексте
         token = self.context.get('token', '')  # Аналогично
         reset_url = f"{settings.FRONT_URL}/auth/password-reset/{uid}/{token}/"
-        # reset_url = f"http://localhost:3000/auth/password-reset/{uid}/{token}/"
         
         return {
             "subject": "Password Reset",

@@ -141,7 +141,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
         # Если email подтвержден, формируем токены
         token = serializer.validated_data['access']
-        print("token:", token)
+        # print("token:", token)
         
         # Формируем данные пользователя
         user_data = {
