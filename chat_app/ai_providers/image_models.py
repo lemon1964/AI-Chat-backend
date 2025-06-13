@@ -10,6 +10,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 import cloudinary.uploader
 from ..models import GeneratedImage
+from backend import settings
 
 
 TOGETHER_API_KEY = config("TOGETHER_API_KEY")
@@ -48,7 +49,7 @@ def query_flux_image(prompt: str) -> Tuple[str, None]:
             TOGETHER_API_URL,
             headers=headers,
             json=payload,
-            timeout=30
+            timeout=90
         )
         
         LAST_REQUEST_TIME = time.time()  # Обновляем время последнего запроса
@@ -62,7 +63,9 @@ def query_flux_image(prompt: str) -> Tuple[str, None]:
                 image_data = data["data"][0]
                 
                 if "url" in image_data:
-                    img_response = requests.get(image_data["url"])
+                    img_response = requests.get(image_data["url"], timeout=90)
+
+                    # img_response = requests.get(image_data["url"])
                     img_response.raise_for_status()
 
                     # 1) загружаем в Cloudinary

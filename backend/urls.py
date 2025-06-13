@@ -10,7 +10,7 @@ urlpatterns = [
     path('api/auth/', include('auth_app.urls')),  # Все пути auth перенесены в auth_app.urls
     path('accounts/', include('allauth.urls')),  # Пути для верификации email   
     path('api/chat/', include('chat_app.urls')),  # Все пути chat перенесены в chat_app.urls
-    path('', lambda request: HttpResponse("Welcome to Django REST Module!")),
+    path('healthz/', lambda request: HttpResponse("Welcome to Django REST Module!")),
 ]
 
 # Добавляем только в режиме разработки
