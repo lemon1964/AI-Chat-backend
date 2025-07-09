@@ -1,3 +1,4 @@
+# backend/auth_app/views.py
 from django.http import HttpResponseRedirect
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -58,7 +59,7 @@ def update_name(request):
     if not new_name:
         return Response({"error": "Имя не может быть пустым."}, status=400)
 
-    user.name = new_name
+    user.name = new_name        # Обновляем имя
     user.save(update_fields=["name"])
 
     return Response({"message": "Имя успешно обновлено.", "name": user.name})
@@ -74,7 +75,7 @@ def update_points(request):
     if not isinstance(points_to_add, int):
         return Response({"error": "Invalid points value"}, status=400)
 
-    user.points += points_to_add
+    user.points += points_to_add    # Добавляем очки
     user.save()
 
     return Response({"message": "Points updated", "total_points": user.points})
@@ -176,6 +177,7 @@ class CustomOAuthRegisterOrLoginView(APIView):
 
         try:
             # Проверяем, есть ли пользователь с таким email
+            # Если нет, создаем нового пользователя
             user, created = User.objects.get_or_create(email=email, defaults={
                 'name': name,
                 'provider': provider,
@@ -239,20 +241,19 @@ class DeleteUserView(APIView):
     permission_classes = [AllowAny]  # Разрешаем доступ без токена
     def delete(self, request, *args, **kwargs):
         # Получение данных из тела запроса
-        user_id = request.data.get('id', None)
+        user_id = request.data.get('id', None)  # Берем id из URL, если он есть
         user_email = request.data.get('email', None)
 
         try:
-            if user_id:
+            if user_id:         # удаление по id
                 user = User.objects.get(id=user_id)
-            elif user_email:
+            elif user_email:    # удаление по email
                 user = User.objects.get(email=user_email)
             else:
                 return Response(
                     {"error": "No valid identifier provided. Use id or email."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
             user.delete()
             return Response({"message": "User deleted successfully"}, status=status.HTTP_200_OK)
         except User.DoesNotExist:

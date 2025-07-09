@@ -1,3 +1,4 @@
+# backend/auth_app/urls.py
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenVerifyView
 
@@ -37,9 +38,9 @@ urlpatterns = [
     # Стандартные пути аутентификации
     path('', include('dj_rest_auth.urls')),  # стандартные пути dj-rest-auth
     
-    # Добавление очков пользователю
-    path('update-points/', update_points, name='update-points'),
-    path('get-user-data/', get_user_data, name='get-user-data'),
-    path('update-name/', update_name, name='update-name'),
+    # API пользователя
+    path('update-points/', update_points, name='update-points'),    # Добавление очков пользователю 
+    path('get-user-data/', get_user_data, name='get-user-data'),    # Получение данных о пользователе 
+    path('update-name/', update_name, name='update-name'),          # Обновление имени
 ]
 

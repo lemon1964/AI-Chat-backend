@@ -76,7 +76,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'allauth.account.middleware.AccountMiddleware',  # Добавляем сюда
-
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -170,10 +169,10 @@ REST_USE_JWT = True  # Используем JWT для аутентификац�
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+    # 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
     # 'ACCESS_TOKEN_LIFETIME': timedelta(seconds=5.5),
     # 'REFRESH_TOKEN_LIFETIME': timedelta(seconds=20.5),
-    # 'ACCESS_TOKEN_LIFETIME': timedelta(days=29),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=29),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,

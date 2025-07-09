@@ -1,3 +1,4 @@
+# backend/auth_app/serializers.py
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import PasswordResetSerializer
@@ -17,14 +18,14 @@ User = get_user_model()
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
+    def get_token(cls, user):               # Добавляем поля в токен
+        token = super().get_token(user)     # Получаем токен
         token['email'] = user.email
         token['name'] = user.name
-        token['provider'] = user.provider  # Добавлено
+        token['provider'] = user.provider
         return token
 
-    def validate(self, attrs):
+    def validate(self, attrs):              # Проверяем email и пароль
         credentials = {
             'email': attrs.get('email'),
             'password': attrs.get('password')
@@ -49,8 +50,8 @@ class CustomRegisterSerializer(RegisterSerializer):
         confirmation_url = f"http://{settings.DOMAIN}{reverse('custom_verify_email')}?uid={uid}&token={token}"
         # Отправка письма через Django SMTP
         subject = "Email Confirmation"
-        message = f"Подтвердите свой адрес электронной почты, перейдя по следующей ссылке: {confirmation_url}"
-        html_message = f"""
+        message = fr"Подтвердите свой адрес электронной почты, перейдя по следующей ссылке: {confirmation_url}"
+        html_message = fr"""
         <html>
             <body>
                 <p>Подтвердите свой адрес электронной почты, перейдя по следующей ссылке:</p>
@@ -86,7 +87,7 @@ class CustomPasswordResetSerializer(PasswordResetSerializer):
         request = self.context.get('request')
         uid = self.context.get('uid', '')  # Теперь uid должен быть в контексте
         token = self.context.get('token', '')  # Аналогично
-        reset_url = f"{settings.FRONT_URL}/auth/password-reset/{uid}/{token}/"
+        reset_url = f"{settings.FRONT_URL}/auth/password-reset/{uid}/{token}/"  # Формируем URL
         
         return {
             "subject": "Password Reset",

@@ -19,10 +19,11 @@ TOGETHER_API_URL = config("TOGETHER_API_URL")
 # Глобальная переменная для отслеживания времени последнего запроса
 LAST_REQUEST_TIME = 0
 
+
 def query_flux_image(prompt: str) -> Tuple[str, None]:
     """Генерация изображений через Together.ai API с обработкой лимитов"""
     global LAST_REQUEST_TIME
-    
+
     try:
         # Соблюдаем лимит в 6 запросов в минуту (10 секунд между запросами)
         current_time = time.time()
@@ -30,38 +31,35 @@ def query_flux_image(prompt: str) -> Tuple[str, None]:
             wait_time = 10 - (current_time - LAST_REQUEST_TIME)
             print(f"Waiting {wait_time:.1f} seconds to comply with rate limits...")
             time.sleep(wait_time)
-        
+
         headers = {
             "Authorization": f"Bearer {TOGETHER_API_KEY}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
-        
+
         payload = {
             "model": "black-forest-labs/FLUX.1-schnell-Free",
             "prompt": prompt,
             "width": 512,
             "height": 512,
             "steps": 4,
-            "seed": int(time.time())  # Динамический seed для разнообразия
+            "seed": int(time.time()),  # Динамический seed для разнообразия
         }
 
         response = requests.post(
-            TOGETHER_API_URL,
-            headers=headers,
-            json=payload,
-            timeout=90
+            TOGETHER_API_URL, headers=headers, json=payload, timeout=90
         )
-        
+
         LAST_REQUEST_TIME = time.time()  # Обновляем время последнего запроса
-        
+
         print("API response:", response.status_code, response.text)
-        
+
         # Обработка успешного ответа
         if response.status_code == 200:
             data = response.json()
             if "data" in data and len(data["data"]) > 0:
                 image_data = data["data"][0]
-                
+
                 if "url" in image_data:
                     img_response = requests.get(image_data["url"], timeout=90)
 
@@ -73,21 +71,21 @@ def query_flux_image(prompt: str) -> Tuple[str, None]:
                         img_response.content,
                         folder="generated-FLUX-schnell",  # опционально, чтобы сгруппировать
                         public_id=str(uuid.uuid4()),
-                        resource_type="image"
+                        resource_type="image",
                     )
                     secure_url = upload_result.get("secure_url")
 
                     # 2) сохраняем в модели и возвращаем URL
                     img = GeneratedImage(prompt=prompt, source_url=image_data["url"])
                     # мы НЕ используем img.file.save — просто сохраняем URL
-                    img.url = secure_url     # вместо img.file
+                    img.url = secure_url  # вместо img.file
                     img.save()
                     return secure_url, None
-                # Для локального хранения               
+                # Для локального хранения
                 # if "url" in image_data:
                 #     img_response = requests.get(image_data["url"])
                 #     img_response.raise_for_status()
-                    
+
                 #     img = GeneratedImage(prompt=prompt, source_url=image_data["url"])
                 #     img.file.save(
                 #         f"{uuid.uuid4()}.jpg",
@@ -95,24 +93,24 @@ def query_flux_image(prompt: str) -> Tuple[str, None]:
                 #         save=True
                 #     )
                 #     return img.file.url, None
-                    
+
                 elif "b64_json" in image_data:
                     # Обработка base64
                     img = GeneratedImage(prompt=prompt)
                     img.file.save(
                         f"{uuid.uuid4()}.png",
                         ContentFile(base64.b64decode(image_data["b64_json"])),
-                        save=True
+                        save=True,
                     )
-                    return img.file.url, None    
-        
+                    return img.file.url, None
+
         # Обработка ошибки 429
         elif response.status_code == 429:
-            retry_after = int(response.headers.get('retry-after', 10))
+            retry_after = int(response.headers.get("retry-after", 10))
             print(f"Rate limit exceeded. Waiting {retry_after} seconds...")
             time.sleep(retry_after)
             return query_flux_image(prompt)  # Рекурсивный повтор
-        
+
         return "[Image Error] No valid image data in response", None
 
     except requests.exceptions.RequestException as e:
@@ -129,11 +127,11 @@ def save_base64_image(b64_data: str) -> Tuple[str, None]:
         image_binary = base64.b64decode(b64_data)
         file_name = f"{uuid.uuid4()}.png"
         file_path = os.path.join(settings.MEDIA_ROOT, "generated", file_name)
-        
+
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "wb") as f:
             f.write(image_binary)
-        
+
         return f"/media/generated/{file_name}", None
     except Exception as e:
         return f"[Image Error] Failed to save image: {str(e)}", None

@@ -13,7 +13,7 @@ from .ai_providers.code_models import (
 )
 
 def query_provider(prompt: str, model_type: ModelType, model_name: str, language: str = "en"):
-    cache_key = f"{model_type}_{model_name}_{hash(prompt)}"
+    cache_key = f"{model_type}_{model_name}_{language}_{hash(prompt)}"    # cache_key = f"{model_type}_{model_name}_{hash(prompt)}"
     if cached := cache.get(cache_key):
         return cached  
 
@@ -30,6 +30,9 @@ def query_provider(prompt: str, model_type: ModelType, model_name: str, language
     if model_name not in MODEL_MAPPING:
         return f"[Error] Unknown model: {model_name}", None
     
-    text, tokens = MODEL_MAPPING[model_name](prompt, language)
-    cache.set(cache_key, (text, tokens), timeout=3600)
-    return MODEL_MAPPING[model_name](prompt)
+    result = MODEL_MAPPING[model_name](prompt, language)  # Один вызов с языком
+    cache.set(cache_key, result, timeout=3600)
+    return result
+    # text, tokens = MODEL_MAPPING[model_name](prompt, language)
+    # cache.set(cache_key, (text, tokens), timeout=3600)
+    # return MODEL_MAPPING[model_name](prompt)
