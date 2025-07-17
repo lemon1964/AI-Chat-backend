@@ -41,6 +41,7 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="answers")
     content = models.TextField()
     tokens_used = models.IntegerField(null=True, blank=True)
+    model = models.CharField(max_length=70, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

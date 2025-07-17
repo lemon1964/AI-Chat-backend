@@ -13,7 +13,7 @@ from .ai_providers.code_models import (
 )
 
 def query_provider(prompt: str, model_type: ModelType, model_name: str, language: str = "en"):
-    cache_key = f"{model_type}_{model_name}_{language}_{hash(prompt)}"    # cache_key = f"{model_type}_{model_name}_{hash(prompt)}"
+    cache_key = f"{model_type}_{model_name}_{language}_{hash(prompt)}"    
     if cached := cache.get(cache_key):
         return cached  
 

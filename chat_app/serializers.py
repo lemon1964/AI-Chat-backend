@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from .models import Category, Question, Answer, GeneratedImage
 from django.conf import settings
-from .utils import query_provider
+# from .utils import query_provider
+from .utils_2 import query_provider
 from .ai_providers.image_models import query_flux_image
 
 
@@ -12,7 +13,7 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = ['id', 'question', 'content', 'image_url', 'tokens_used', 'created_at']
+        fields = ['id', 'question', 'content', 'model', 'image_url', 'tokens_used', 'created_at']
 
     def get_image_url(self, obj):
         # если content — это путь к файлу изображения
@@ -24,14 +25,20 @@ class AnswerSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     model_type = serializers.CharField(write_only=True)
     model = serializers.CharField(write_only=True)
+    actual_model = serializers.SerializerMethodField()
     answers = AnswerSerializer(many=True, read_only=True)
     category_id = serializers.UUIDField(write_only=True)
     language = serializers.CharField(write_only=True)
 
     class Meta:
         model = Question
-        fields = ['id', 'category', 'category_id', 'user', 'prompt', 'model', 'model_type', 'created_at', 'answers', 'language']
+        fields = ['id', 'category', 'category_id', 'user', 'prompt', 'model', 
+                 'actual_model', 'model_type', 'created_at', 'answers', 'language']
         read_only_fields = ['category', 'user', 'created_at', 'answers']
+        
+    def get_actual_model(self, obj):
+        last_answer = obj.answers.order_by('-created_at').first()
+        return last_answer.model if last_answer else obj.model
 
     def create(self, validated_data):
         model_type = validated_data.pop('model_type')
@@ -39,7 +46,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         prompt_text = validated_data.get('prompt')
         category_id = validated_data.pop('category_id')
         language = validated_data.pop('language', 'en')
-        # Получаем объект категории
+        
         category = Category.objects.get(id=category_id)
         user = self.context['request'].user
         
@@ -58,20 +65,91 @@ class QuestionSerializer(serializers.ModelSerializer):
                 
             Answer.objects.create(
                 question=question,
-                content=image_url,  # Сохраняем локальный URL
-                tokens_used=0  # Для изображений можно не считать токены
+                content=image_url,
+                tokens_used=0,
+                model=model_name  # Для изображений используем исходную модель
             )
-
         else:
-            text, tokens = query_provider(prompt_text, model_type, model_name, language)
+            # Получаем content, tokens И реальную модель
+            text, tokens, used_model = query_provider(
+                prompt=prompt_text,
+                model_type=model_type,
+                model_id=model_name,
+                language=language
+            )
             Answer.objects.create(
                 question=question,
                 content=text,
-                tokens_used=tokens
-            )    
- 
+                tokens_used=tokens,
+                model=used_model  # Сохраняем реально использованную модель
+            )
+        
         return question
+# class QuestionSerializer(serializers.ModelSerializer):
+#     model_type = serializers.CharField(write_only=True)
+#     model = serializers.CharField(write_only=True)
+#     actual_model = serializers.SerializerMethodField()
+#     answers = AnswerSerializer(many=True, read_only=True)
+#     category_id = serializers.UUIDField(write_only=True)
+#     language = serializers.CharField(write_only=True)
 
+#     class Meta:
+#         model = Question
+#         fields = ['id', 'category', 'category_id', 'user', 'prompt', 'model', 'actual_model', 'model_type', 'created_at', 'answers', 'language']
+#         read_only_fields = ['category', 'user', 'created_at', 'answers']
+        
+#     def get_actual_model(self, obj):
+#         """Берём модель только из ответов текущего пользователя"""
+#         last_answer = obj.answers.filter(
+#             question__user=obj.user
+#         ).order_by('-created_at').first()
+#         return last_answer.model if last_answer else obj.model
+
+#     def create(self, validated_data):
+#         model_type = validated_data.pop('model_type')
+#         model_name = validated_data.pop('model')
+#         prompt_text = validated_data.get('prompt')
+#         category_id = validated_data.pop('category_id')
+#         language = validated_data.pop('language', 'en')
+#         # Получаем объект категории
+#         category = Category.objects.get(id=category_id)
+#         user = self.context['request'].user
+        
+#         question = Question.objects.create(
+#             prompt=prompt_text,
+#             category=category,
+#             user=user,
+#             model=model_name,
+#             model_type=model_type
+#         )
+        
+#         if model_type == 'image':
+#             image_url, error = query_flux_image(prompt_text)
+#             if error:
+#                 return Response({"error": error}, status=400)
+                
+#             Answer.objects.create(
+#                 question=question,
+#                 content=image_url,  # Сохраняем локальный URL
+#                 tokens_used=0,  # Для изображений можно не считать токены
+#                 model=model_name
+#             )
+
+#         else:
+#             text, tokens = query_provider(
+#                 prompt=prompt_text,
+#                 model_type=model_type,  # "text" или "code"
+#                 model_id=model_name,    # "deepseek/deepseek-r1-0528-qwen3-8b:free"
+#                 language=language
+#             )
+#             Answer.objects.create(
+#                 question=question,
+#                 content=text,
+#                 tokens_used=tokens,
+#                 model=real_used_model
+#             )    
+ 
+#         return question
 
 class CategorySerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True, read_only=True)
