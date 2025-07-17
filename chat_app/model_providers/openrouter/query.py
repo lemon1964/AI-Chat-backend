@@ -8,7 +8,6 @@ OPENROUTER_API_KEY = config("OPENROUTER_API_KEY")
 OPENROUTER_URL = config("OPENROUTER_API_URL")
 
 
-# backend/chat_app/model_providers_2/openrouter/query.py
 def query_openrouter(
     prompt: str,
     model_id: str,
@@ -17,7 +16,9 @@ def query_openrouter(
     temperature: float = 0.7,
 ):
     print("prompt", prompt, "model_id", model_id)
-    print("language", language, "system_prompt", system_prompt, "temperature", temperature)
+    print(
+        "language", language, "system_prompt", system_prompt, "temperature", temperature
+    )
     """Обновлённая версия с поддержкой кастомных параметров"""
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -44,7 +45,7 @@ def query_openrouter(
         response.raise_for_status()
         content = response.json()["choices"][0]["message"]["content"]
         return content, model_id
-    
+
     except Exception as e:
         print(f"Ошибка запроса: {str(e)}")
 
@@ -74,4 +75,3 @@ def query_openrouter(
                 else "OpenRouter is currently unavailable. Please try again later."
             )
             return error_msg, None
-

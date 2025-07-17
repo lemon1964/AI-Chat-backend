@@ -1,38 +1,25 @@
-# backend/chat_app/utils.py
+# backend/chat_app/utils_2.py
 from django.core.cache import cache
-from .types import ModelType
-from .ai_providers.text_models import (
-    query_deepseek,
-    query_mistral,
-    query_deephermes,
-)
-from .ai_providers.code_models import (
-    query_qwen3_coder,
-    query_llama3_coder,
-    query_deepseek_prover
-)
+from .model_providers.openrouter.query import query_openrouter
+from .model_providers.prompt_config import prompt_config
 
-def query_provider(prompt: str, model_type: ModelType, model_name: str, language: str = "en"):
-    cache_key = f"{model_type}_{model_name}_{language}_{hash(prompt)}"    
+def query_provider(prompt: str, model_type: str, model_id: str, language: str = "en"):
+    """Возвращает: (content, tokens_used, real_used_model)"""
+    cache_key = f"{model_type}_{model_id}_{language}_{hash(prompt)}"
     if cached := cache.get(cache_key):
-        return cached  
+        return cached[0], cached[1], cached[2]
 
-    MODEL_MAPPING = {
-        'deepseek_qwen3': query_deepseek,
-        'mistral_devstral': query_mistral,
-        'deephermes': query_deephermes,
-        
-        'llama3_coder': query_llama3_coder,
-        'deepseek_prover': query_deepseek_prover,
-        'qwen3_coder': query_qwen3_coder,
-        }
+    config = prompt_config.get(model_type, prompt_config["text"])
+    system_prompt = config["default_systems"].get(language, config["default_systems"]["en"])
     
-    if model_name not in MODEL_MAPPING:
-        return f"[Error] Unknown model: {model_name}", None
+    content, used_model = query_openrouter(
+        prompt=prompt,
+        model_id=model_id,
+        language=language,
+        system_prompt=system_prompt,
+        temperature=config["temperature"]
+    )
     
-    result = MODEL_MAPPING[model_name](prompt, language)  # Один вызов с языком
-    cache.set(cache_key, result, timeout=3600)
-    return result
-    # text, tokens = MODEL_MAPPING[model_name](prompt, language)
-    # cache.set(cache_key, (text, tokens), timeout=3600)
-    # return MODEL_MAPPING[model_name](prompt)
+    tokens_used = len(content) // 4 if content else 0
+    cache.set(cache_key, (content, tokens_used, used_model), timeout=3600)
+    return content, tokens_used, used_model
