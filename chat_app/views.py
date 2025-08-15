@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from .models import Category, Question, Answer
 from .serializers import CategorySerializer, QuestionSerializer, AnswerSerializer
 from .model_providers.openrouter.selector import get_top_models
-# from .model_providers.openrouter.query import query_openrouter
+from .model_providers.openrouter.query import query_openrouter
 
 
 class CategoryViewSet(
@@ -65,14 +65,14 @@ def get_models(request):
     return Response(get_top_models())
 
 
-# @api_view(["POST"])
-# @permission_classes([AllowAny])
-# def ask_model(request):
-#     data = request.data
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def ask_model(request):
+    data = request.data
 
-#     result = query_openrouter(
-#         prompt=data["prompt"],
-#         model_id=data["model_id"],
-#         language=data.get("language", "en"),
-#     )
-#     return Response(result)
+    result = query_openrouter(
+        prompt=data["prompt"],
+        model_id=data["model_id"],
+        language=data.get("language", "en"),
+    )
+    return Response(result)

@@ -36,7 +36,7 @@ class AnswerAdmin(admin.ModelAdmin):
 class GeneratedImageAdmin(admin.ModelAdmin):
     """Админка сгенерированных изображений"""
     list_display = ("prompt", "preview", "id", "created_at")
-    readonly_fields = ("preview",)
+    readonly_fields = ("preview", "file")
     
     def preview(self, obj):
         if obj.file:  # Проверяем наличие файла

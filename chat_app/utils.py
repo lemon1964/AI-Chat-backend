@@ -1,4 +1,4 @@
-# backend/chat_app/utils_2.py
+# backend/chat_app/utils.py
 from django.core.cache import cache
 from .model_providers.openrouter.query import query_openrouter
 from .model_providers.prompt_config import prompt_config

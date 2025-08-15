@@ -2,9 +2,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import CategoryViewSet, QuestionViewSet, AnswerViewSet
-
-from .views import get_models
-# from .views import get_models, ask_model
+from .views import get_models, ask_model
 
 
 router = DefaultRouter()
@@ -18,6 +16,5 @@ router.register(r'questions/(?P<question_pk>[^/.]+)/answers',
 urlpatterns = [
     path('', include(router.urls)),
     path("models/", get_models, name="models_overview"),
-    # path("test-query/", ask_model, name="test_query"),
-
+    path("test-query/", ask_model, name="test_query"),
 ]
