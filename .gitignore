@@ -1,6 +1,7 @@
 # ai-chat-django/.gitignore
 __pycache__/
 .pytest_cache
+pytest.ini
 *.pyc
 *.log
 *.env
