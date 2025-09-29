@@ -1,19 +1,43 @@
 # ai-chat-django/.github/workflows/subs-cron.yml
-name: Charge subscriptions
+name: charge-subscriptions (daily)
 
 on:
   schedule:
-    - cron: "5 2 * * *"   # каждый день в 02:05 UTC
-  workflow_dispatch:
+    # UTC! 04:20 UTC ежедневно — 4:20 в Москве
+    - cron: "20 4 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
 
 jobs:
-  ping:
+  run-charges:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BACKEND_URL: ${{ secrets.BACKEND_URL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      LIMIT: "100"                                     # разовая порция
     steps:
-      - name: Call runner endpoint
+      - name: Warm up Render (health check)
         run: |
-          curl -X POST \
-            -H "X-CRON-SECRET: ${{ secrets.CRON_SECRET }}" \
-            --retry 5 --retry-delay 15 \
-            https://YOUR-BACKEND-URL/api/payment/charge-subscriptions/
-          echo "Done"
+          echo "GET $BACKEND_URL/healthz/"
+          curl -sS --max-time 15 "$BACKEND_URL/healthz/" || true
+
+      - name: Charge subscriptions (POST)
+        run: |
+          set -e
+          echo "POST $BACKEND_URL/api/payment/charge-subscriptions/ limit=$LIMIT"
+          curl -sS \
+            --fail \
+            --retry 5 \
+            --retry-all-errors \
+            --max-time 60 \
+            -H "Content-Type: application/json" \
+            -H "X-CRON-SECRET: $CRON_SECRET" \
+            -d "{\"limit\": $LIMIT}" \
+            "$BACKEND_URL/api/payment/charge-subscriptions/"
+          echo "✓ charge job finished"
+
+      - name: Done
+        run: echo "All good ✅"
