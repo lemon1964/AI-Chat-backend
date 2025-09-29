@@ -4,7 +4,7 @@ name: charge-subscriptions (daily)
 on:
   schedule:
     # UTC! 04:20 UTC ежедневно — 4:20 в Москве
-    - cron: "20 4 * * *"
+    - cron: "0 15 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -19,6 +19,12 @@ jobs:
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
       LIMIT: "100"                                     # разовая порция
     steps:
+      - name: Summary
+        run: |
+          echo "### Charge run" >> $GITHUB_STEP_SUMMARY
+          echo "- URL: $BACKEND_URL" >> $GITHUB_STEP_SUMMARY
+          echo "- Limit: $LIMIT" >> $GITHUB_STEP_SUMMARY
+
       - name: Warm up Render (health check)
         run: |
           echo "GET $BACKEND_URL/healthz/"
