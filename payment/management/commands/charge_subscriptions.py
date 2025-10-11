@@ -11,7 +11,7 @@ class Command(BaseCommand):
     help = "Charge due subscriptions via saved payment_method_id (YooKassa)."
 
     def add_arguments(self, parser):
-        parser.add_argument('--limit', type=int, default=100, help='Max subscriptions to process per run')
+        parser.add_argument('--limit', type=int, default=100, help='Максимальное количество подписок на обработку за один запуск.')
 
     def handle(self, *args, **opts):
         now = timezone.now()

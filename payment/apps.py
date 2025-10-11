@@ -1,4 +1,4 @@
-# ai-chat-django/payment/apps.py
+# payment/apps.py
 from django.apps import AppConfig
 
 

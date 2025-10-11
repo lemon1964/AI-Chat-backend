@@ -1,3 +1,4 @@
+# mermind/prompt_presets.py
 DIAGRAM_TYPES = [
     "flowchart","sequence","state","er","class","journey","gantt",
     "timeline","pie","mindmap","gitGraph","quadrant"

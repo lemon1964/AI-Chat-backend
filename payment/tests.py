@@ -1,4 +1,4 @@
-# payment/tests/test_webhooks_min.py
+# ai-chat-django/payment/tests.py
 import json
 from types import SimpleNamespace
 from decimal import Decimal

@@ -429,6 +429,7 @@ def charge_subscriptions_http(request):
     call_command('charge_subscriptions', limit=100)
     return Response({'status': 'ok'})
 
+
 # Отписка, в текущей реализации немедленно лишит юзера премиума.
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

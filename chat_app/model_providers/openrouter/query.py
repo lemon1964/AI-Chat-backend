@@ -49,20 +49,20 @@ def query_openrouter(
         try:
             data = response.json()
             # ключи верхнего уровня
-            print("[OR] top keys:", list(data.keys()))
+            # print("[OR] top keys:", list(data.keys()))
             # ключи первого choice
             if data.get("choices"):
-                print("[OR] choice[0] keys:", list(data["choices"][0].keys()))
+                # print("[OR] choice[0] keys:", list(data["choices"][0].keys()))
                 # что внутри message / content
                 msg = data["choices"][0].get("message", {})
-                print("[OR] message keys:", list(msg.keys()) if isinstance(msg, dict) else type(msg))
+                # print("[OR] message keys:", list(msg.keys()) if isinstance(msg, dict) else type(msg))
                 # покажем первые 200 символов «контента» (где бы он ни лежал)
                 content_preview = (
                     (msg.get("content") if isinstance(msg, dict) else None)
                     or data["choices"][0].get("content")
                     or ""
                 )
-                print("[OR] content preview:", str(content_preview)[:200].replace("\n", " "))
+                # print("[OR] content preview:", str(content_preview)[:200].replace("\n", " "))
             else:
                 print("[OR] no choices in payload!")
         except Exception as jerr:

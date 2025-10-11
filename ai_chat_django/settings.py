@@ -1,4 +1,4 @@
-# ai-chat-django/ai_chat_django/settings.py
+# ai_chat_django/settings.py
 from pathlib import Path
 from decouple import config, Csv
 from datetime import timedelta
@@ -14,9 +14,9 @@ if DJANGO_ENV == "local":
     ALLOWED_HOSTS = [
         "127.0.0.1",  # Локальный хост для тестов
         "localhost",  # Чтобы поддерживать локальный доступ через localhost
-        "1256-178-128-39-136.ngrok-free.app",  # ngrok URL для публичных запросовr
-        "chatlemon64abc.pagekite.me",  # Уникальный URL
-        "591c3a8f9fea3e5451496639729483a5.serveo.net",  # Текущий URL
+        "1256-178-128-39-136.ngrok-free.app",  # ngrok URL для публичных запросов
+        "chatlemon64abc.pagekite.me",  # URL pagekite
+        "591c3a8f9fea3e5451496639729483a5.serveo.net",  # URL serveo
     ]
     CSRF_TRUSTED_ORIGINS = [
         "http://localhost:3000",
