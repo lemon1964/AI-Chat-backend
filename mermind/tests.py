@@ -1,4 +1,4 @@
-# ai-chat-django/mermind/tests/test_mermind_min.py
+# ai-chat-django/mermind/tests.py
 import json
 import pytest
 from django.contrib.auth import get_user_model
@@ -61,7 +61,7 @@ def test_generate_sanitizes_and_normalizes(monkeypatch):
     # мок классификатора
     monkeypatch.setattr(
         "mermind.services.openrouter_mermaid.classify",
-        lambda text, lang="ru": "sequence",
+        lambda *args, **kwargs: "sequence",
     )
 
     # мок OpenRouter
